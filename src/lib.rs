@@ -3,6 +3,7 @@ use std::process;
 
 const TEXT_PARAM: &'static str = "text";
 const TOKEN_PARAM: &'static str = "TOKEN";
+const SHORTHASH_PARAM: &'static str = "shortHash";
 const URL_PARAM: &'static str = "URL";
 const OPEN_ENDPOINT: &'static str = "dev/open";
 const LINK_ENDPONT: &'static str = "dev/link";
@@ -103,12 +104,12 @@ pub fn link(stdout: io::Stdout, input: &mut dyn Read) {
     let config_context = config::load_config();
 
     let mut url = http::prepare_endpoint(&config_context, LINK_ENDPONT);
-    http::append_query(&mut url, input, TEXT_PARAM);
+    http::append_query(&mut url, input, SHORTHASH_PARAM);
     let resp = http::get_http_response_or_fail(&url);
     let _ = match resp.get(&String::from(TOKEN_PARAM)) {
         Some(token) => {
             config::store_config(&config_context, &token);
-            stdout.lock().write(token.as_ref())
+            stdout.lock().write("You are all set!\nYou can start using push/pull\n".as_ref())
         },
         _ => fail("Failed to link with the back-end"),
     };
