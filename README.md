@@ -9,8 +9,8 @@ rclip is a remote clipboard. It allows users to push and pull data remotely from
 Linux and OSX are supported. Windows is not actively tested but should work as well.
 
 ## Table of Contents
-* [Usage](#usage)
-    * [Back-end](#back-end)
+* [Usage](#usage-demo)
+    * [Back-ends](#back-ends)
 * [Build & Test](#build--test)
 * [License](#license)
 
@@ -35,6 +35,11 @@ ARGS:
         Copy the data from the remote clipboard
 
 ```
+
+### Usage demo
+
+<a href="https://asciinema.org/a/340483?loop=1&autoplay=1&speed=2"><img src="https://asciinema.org/a/340483.svg" width="400"/></a>
+
 ### Back-ends
 
 The CLI requires a remote back-end to communicate with.
@@ -45,6 +50,10 @@ URL=https://blah.amazonaws.com/dev
 
 You can choose and deploy a back-end for your own usage:
 https://github.com/noboruma/rclip-backends
+
+#### Setup demo
+
+<a href="https://asciinema.org/a/340551?loop=1&autoplay=1&speed=3"><img src="https://asciinema.org/a/340551.svg" width="400"/></a>
 
 /!\ The proposed solution is far from being optimal. This is work in progress.
 
