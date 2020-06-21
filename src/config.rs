@@ -1,54 +1,80 @@
-use crate::{fail, URL_PARAM, TOKEN_PARAM};
+use crate::{URL_PARAM, TOKEN_PARAM};
 use dotenv;
 use std::fs::File;
 use std::io::Write;
 use std::path::PathBuf;
 use url::Url;
 
-use mocktopus::macros::*;
+#[derive(Debug)]
+pub enum Error {
+    FileNotFound(String),
+    DirNotFound(String),
+    URLNotFound,
+    URLIllFormed,
+}
 
+#[derive(Clone)]
 pub struct ConfigContext {
     pub config_path: PathBuf,
     pub base_url: url::Url,
     pub token: String,
 }
 
-fn get_config_path() -> std::path::PathBuf {
-    let mut config_path = dirs::home_dir()
-        .unwrap_or_else(|| fail("$HOME dir not defined"));
-    config_path.push(".rclip.env");
-    return config_path;
-}
-
-#[mockable]
-pub fn load_config() -> ConfigContext {
-    let config_path = get_config_path();
-    dotenv::from_path(config_path.as_path())
-        .unwrap_or_else(|_| fail(format!("{} file is missing",
-                    config_path.to_str().unwrap()).as_str()));
-
-    let url = Url::parse(&dotenv::var(URL_PARAM)
-        .unwrap_or_else(|_| fail("URL variable is missing from the config file\nPlease look at: https://github.com/noboruma/rclip-backends to setup a backend")))
-        .unwrap_or_else(|_| fail("URL variable has an ill-formed URL format"));
-
-    let token = dotenv::var(TOKEN_PARAM)
-        .unwrap_or(String::new());
-
-    return ConfigContext {
-        config_path,
-        base_url: url,
-        token,
+fn get_config_path() -> Option<std::path::PathBuf> {
+    let mut config_path = match dirs::home_dir() {
+        Some(resp) => resp,
+        None => return None,
     };
+    config_path.push(".rclip.env");
+    return Some(config_path);
 }
 
-#[mockable]
-pub fn store_config(config_context: &ConfigContext, token: &String) {
-    let mut data = String::new();
-    data += URL_PARAM; data += "="; data += config_context.base_url.as_str(); data += "\n";
-    data += TOKEN_PARAM; data += "="; data += token.as_str(); data += "\n";
+impl ConfigContext {
 
-    let mut config_file = File::create(&config_context.config_path).unwrap();
-    config_file.write(data.as_bytes()).unwrap();
+    pub fn load() -> Result<ConfigContext, Error> {
+        let config_path = match get_config_path() {
+            Some(s) => s,
+            None => return Err(Error::DirNotFound("$HOME".to_string()))
+        };
+
+        match dotenv::from_path(config_path.as_path()) {
+            Ok(()) => (),
+            Err(_) => return Err(
+                Error::FileNotFound(
+                    format!("{} file is missing", config_path.to_str().unwrap())
+                )
+            ),
+        };
+
+        let url = match dotenv::var(URL_PARAM) {
+            Ok(resp) => resp,
+            Err(_) => return Err(Error::URLNotFound),
+        };
+
+        let url = match Url::parse(&url) {
+            Ok(resp) => resp,
+            Err(_) => return Err(Error::URLIllFormed),
+        };
+
+        let token = dotenv::var(TOKEN_PARAM)
+            .unwrap_or(String::new());
+
+        return Ok(ConfigContext {
+            config_path,
+            base_url: url,
+            token,
+        });
+    }
+
+    pub fn store(&self) {
+        let mut data = String::new();
+        data += URL_PARAM; data += "="; data += self.base_url.as_str(); data += "\n";
+        data += TOKEN_PARAM; data += "="; data += self.token.as_str(); data += "\n";
+
+        let mut config_file = File::create(&self.config_path).unwrap();
+        config_file.write(data.as_bytes()).unwrap();
+    }
+
 }
 
 #[cfg(test)]
@@ -58,6 +84,6 @@ mod tests {
 
     #[test]
     fn check_config_path_exists() {
-        assert!(!get_config_path().into_os_string().is_empty());
+        assert!(!get_config_path().unwrap().into_os_string().is_empty());
     }
 }

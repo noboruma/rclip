@@ -1,4 +1,4 @@
-use crate::{config, fail, TOKEN_PARAM};
+use crate::{config, TOKEN_PARAM, ClipboardError};
 use std::collections::HashMap;
 use std::io::Read;
 use url::Url;
@@ -13,17 +13,23 @@ pub fn prepare_endpoint(config_context: &config::ConfigContext, path: &str) -> U
 }
 
 #[mockable]
-pub fn get_http_response_or_fail(url: &Url) -> HashMap<String, String> {
-    reqwest::blocking::get(url.as_str())
-        .unwrap_or_else(|_| fail(format!("GET {} failed", url.as_str()).as_str()))
-        .json::<HashMap<String, String>>()
-        .unwrap_or_else(|_| fail("GET result ill-formed"))
+pub fn get_http_response(url: &Url) -> Result<HashMap<String, String>, ClipboardError>{
+    let resp = match reqwest::blocking::get(url.as_str()) {
+        Ok(resp) => resp,
+        Err(_) => return Err(ClipboardError::NetworkError(url.to_string())),
+    };
+    match resp.json::<HashMap<String, String>>() {
+        Ok(resp) => Ok(resp),
+        Err(_) => return Err(ClipboardError::BackendError),
+    }
 }
 
 #[mockable]
-pub fn get_http_or_fail(url: &Url) -> () {
-    reqwest::blocking::get(url.as_str())
-        .unwrap_or_else(|_| fail(format!("GET {} failed", url.as_str()).as_str()));
+pub fn get_http(url: &Url) -> Result<(), ClipboardError> {
+    match reqwest::blocking::get(url.as_str()) {
+        Ok(_) => Ok(()),
+        Err(_) => return Err(ClipboardError::NetworkError(url.to_string())),
+    }
 }
 
 pub fn append_query(url: &mut Url, input: &mut dyn Read, param: &str) {
@@ -43,17 +49,18 @@ mod tests {
     fn check_url_without_token() {
         let config_context = config::ConfigContext {
             base_url: url::Url::parse("https://toto.com").unwrap(),
-            config_path: PathBuf::from("/toor"),
+            config_path: PathBuf::from("/foo"),
             token: "".to_string(),
         };
         let url = prepare_endpoint(&config_context, "ok");
         assert_eq!(url.as_str(), "https://toto.com/ok?TOKEN=");
     }
+
     #[test]
     fn check_url_with_token() {
         let config_context = config::ConfigContext {
             base_url: url::Url::parse("https://toto.com").unwrap(),
-            config_path: PathBuf::from("/toor"),
+            config_path: PathBuf::from("/foo"),
             token: "abc".to_string(),
         };
         let url = prepare_endpoint(&config_context, "ok");
