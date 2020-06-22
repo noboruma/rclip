@@ -41,7 +41,14 @@ impl Clipboard {
     ///
     /// ```
     /// use remote_clipboard as rclip;
-    /// //rclip::push(&mut "toto".as_bytes());
+    /// use std::path::PathBuf;
+    /// use url::Url;
+    /// let clipboard = rclip::Clipboard::from(rclip::config::ConfigContext {
+    ///     config_path: PathBuf::from("/blah"),
+    ///     base_url: url::Url::parse("https://toto.com").unwrap(),
+    ///     token: String::from("token"),
+    /// });
+    /// clipboard.push(&mut "toto".as_bytes());
     /// ```
     pub fn push(&self, input: &mut dyn Read) -> Result<(), ClipboardError> {
         let mut url = http::prepare_endpoint(&self.config, COPY_ENDPOINT);
@@ -55,8 +62,15 @@ impl Clipboard {
     /// ```
     /// use remote_clipboard as rclip;
     /// use std::io::{self};
+    /// use std::path::PathBuf;
+    /// use url::Url;
+    /// let clipboard = rclip::Clipboard::from(rclip::config::ConfigContext {
+    ///     config_path: PathBuf::from("/blah"),
+    ///     base_url: url::Url::parse("https://toto.com").unwrap(),
+    ///     token: String::from("token"),
+    /// });
     /// let stdout = io::stdout();
-    /// //rclip::pull(stdout);
+    /// clipboard.pull(&mut stdout.lock());
     /// ```
     pub fn pull(&self, output: &mut dyn Write) -> Result<(), ClipboardError> {
         let url = http::prepare_endpoint(&self.config, PASTE_ENDPONT);
@@ -75,9 +89,14 @@ impl Clipboard {
     ///
     /// ```
     /// use remote_clipboard as rclip;
-    /// use std::io::{self};
-    /// let stdout = io::stdout();
-    /// //rclip::open(stdout);
+    /// use std::path::PathBuf;
+    /// use url::Url;
+    /// let mut clipboard = rclip::Clipboard::from(rclip::config::ConfigContext {
+    ///     config_path: PathBuf::from("/blah"),
+    ///     base_url: url::Url::parse("https://toto.com").unwrap(),
+    ///     token: String::from("token"),
+    /// });
+    /// clipboard.open();
     /// ```
     pub fn open(&mut self) -> Result<(), ClipboardError> {
         let url = http::prepare_endpoint(&self.config, OPEN_ENDPOINT);
@@ -99,8 +118,14 @@ impl Clipboard {
     /// ```
     /// use remote_clipboard as rclip;
     /// use std::io::{self};
-    /// let stdout = io::stdout();
-    /// //rclip::link(stdout, &mut "012345".as_bytes());
+    /// use std::path::PathBuf;
+    /// use url::Url;
+    /// let mut clipboard = rclip::Clipboard::from(rclip::config::ConfigContext {
+    ///     config_path: PathBuf::from("/blah"),
+    ///     base_url: url::Url::parse("https://toto.com").unwrap(),
+    ///     token: String::from("token"),
+    /// });
+    /// clipboard.link(&mut "012345".as_bytes());
     /// ```
     /// TODO: check input size
     pub fn link(&mut self, input: &mut dyn Read) -> Result<(), ClipboardError> {
