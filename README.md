@@ -1,6 +1,6 @@
 # rclip
 
-[![Build Status](https://travis-ci.com/noboruma/rclip.svg?branch=master)](https://travis-ci.com/noboruma/rclip)
+[![Build Status](https://travis-ci.org/noboruma/rclip.svg?branch=master)](https://travis-ci.org/noboruma/rclip)
 [![codecov](https://codecov.io/gh/noboruma/rclip/branch/master/graph/badge.svg)](https://codecov.io/gh/noboruma/rclip)
 [![crates.io](https://img.shields.io/crates/v/remote-clipboard.svg)](https://crates.io/crates/remote-clipboard)
 

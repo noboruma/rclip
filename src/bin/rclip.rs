@@ -40,8 +40,20 @@ fn fail_error(res: &Result<(), rclip::ClipboardError>) {
     match res {
         Err(rclip::ClipboardError::BackendError) => fail("Failed to open clipboard with the back-end"),
         Err(rclip::ClipboardError::NetworkError(url)) => fail(("Failed to contact the back-end at: ".to_string()+&url).as_str()),
-        _ => {},
+        Ok(_) => {},
     }
+}
+
+fn construct_clipboard() -> rclip::Clipboard {
+
+    let config = match rclip::config::ConfigContext::load() {
+        Ok(config) => config,
+        Err(rclip::config::Error::URLNotFound) => fail(format!("{}{}", rclip::URL_PARAM, " variable is missing from the config file\nPlease look at: https://github.com/noboruma/rclip-backends to setup a backend").as_str()),
+        Err(rclip::config::Error::DirNotFound(s)) => fail((s+" not found").as_str()),
+        Err(rclip::config::Error::URLIllFormed) => fail(format!("{}{}", rclip::URL_PARAM, " variable has ill-formed URL format").as_str()),
+    };
+
+    return rclip::Clipboard::from(config);
 }
 
 fn main() {
@@ -54,20 +66,12 @@ fn main() {
         fail("too many arguments");
     }
 
-    let config = match rclip::config::ConfigContext::load() {
-        Ok(config) => config,
-        Err(rclip::config::Error::URLNotFound) => fail(format!("{}{}", rclip::URL_PARAM, " variable is missing from the config file\nPlease look at: https://github.com/noboruma/rclip-backends to setup a backend").as_str()),
-        Err(rclip::config::Error::FileNotFound(s)) => fail(s.as_str()),
-        Err(rclip::config::Error::DirNotFound(s)) => fail((s+"not found").as_str()),
-        Err(rclip::config::Error::URLIllFormed) => fail(format!("{}{}", rclip::URL_PARAM, " variable has ill-formed URL format").as_str()),
-    };
-
-    let mut clipboard = rclip::Clipboard::from(config);
 
     match args.nth(1) {
         None => fail("not enough arguments"),
         Some(arg) => match arg.as_ref() {
             "open" => {
+                let mut clipboard = construct_clipboard();
                 match args.next() {
                     Some(_) => fail("too many arguments"),
                     None => {
@@ -79,6 +83,7 @@ fn main() {
                 }
             },
             "link" => {
+                let mut clipboard = construct_clipboard();
                 match args.next() {
                     Some(text) => {
                         fail_error(&clipboard.link(&mut text.as_bytes()));
@@ -89,6 +94,7 @@ fn main() {
                 }
             },
             "push" => {
+                let clipboard = construct_clipboard();
                 let mut input : Box<dyn Read> = match args.next() {
                     Some(text) => Box::new(rclip::stream::StringStream::from(text)),
                     None => Box::new(stdin.lock()),
@@ -96,6 +102,7 @@ fn main() {
                 fail_error(&clipboard.push(&mut input));
             },
             "pull" => {
+                let clipboard = construct_clipboard();
                 let _ = match args.next() {
                     Some(_) => fail("too many arguments"),
                     None => fail_error(&clipboard.pull(&mut stdout.lock())),

@@ -7,7 +7,6 @@ use url::Url;
 
 #[derive(Debug)]
 pub enum Error {
-    FileNotFound(String),
     DirNotFound(String),
     URLNotFound,
     URLIllFormed,
@@ -33,17 +32,13 @@ impl ConfigContext {
 
     pub fn load() -> Result<ConfigContext, Error> {
         let config_path = match get_config_path() {
-            Some(s) => s,
-            None => return Err(Error::DirNotFound("$HOME".to_string()))
+            Some(path) => path,
+            None => return Err(Error::DirNotFound("$HOME not found".to_string())),
         };
 
         match dotenv::from_path(config_path.as_path()) {
             Ok(()) => (),
-            Err(_) => return Err(
-                Error::FileNotFound(
-                    format!("{} file is missing", config_path.to_str().unwrap())
-                )
-            ),
+            Err(_) => (),
         };
 
         let url = match dotenv::var(URL_PARAM) {

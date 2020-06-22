@@ -31,7 +31,7 @@ mod tests {
     #[test]
     fn check_string_stream() {
         let mut ss = StringStream {
-            inner: "toto".to_string(),
+            inner: "toti".to_string(),
             index: 0
         };
         let rss : &mut dyn io::Read = &mut ss;
@@ -42,7 +42,9 @@ mod tests {
         assert_eq!(arr, ['t' as u8, 'o' as u8]);
         let n = rss.read(&mut arr);
         assert_eq!(n.unwrap(), 2);
-        assert_eq!(arr, ['t' as u8, 'o' as u8]);
+        assert_eq!(arr, ['t' as u8, 'i' as u8]);
+        let n = rss.read(&mut arr);
+        assert_eq!(n.unwrap(), 0);
     }
 
 }
