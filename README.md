@@ -4,13 +4,13 @@
 [![codecov](https://codecov.io/gh/noboruma/rclip/branch/master/graph/badge.svg)](https://codecov.io/gh/noboruma/rclip)
 [![crates.io](https://img.shields.io/crates/v/remote-clipboard.svg)](https://crates.io/crates/remote-clipboard)
 
-rclip is a remote clipboard. It allows users to push and pull data remotely from two different machines.
+rclip is a remote clipboard. It allows users to copy and paste data remotely from two different machines.
 
 Linux and OSX are supported. Windows is not actively tested but should work as well.
 
 ## Table of Contents
 * [Usage](#usage-demo)
-    * [Back-ends](#back-ends)
+    * [Backend](#backend)
 * [Build & Test](#build--test)
 * [License](#license)
 
@@ -29,28 +29,31 @@ ARGS:
         Creates a new remote clipboard
     link [hash]
         Link current host with a remote clipboard
-    push [data]
+    copy [data]
         Copy the data to the remote clipboard
-    pull
+    paste
         Copy the data from the remote clipboard
 
 ```
 
 ### Usage demo
+<a href="https://asciinema.org/a/342749?loop=1&autoplay=1&speed=2"><img src="https://asciinema.org/a/340483.svg" width="400"/></a>
 
-<a href="https://asciinema.org/a/340483?loop=1&autoplay=1&speed=2"><img src="https://asciinema.org/a/340483.svg" width="400"/></a>
+### Backend
 
-### Back-ends
+The CLI requires a remote backend to store & serve a remote clipboard.
 
-The CLI requires a remote back-end to communicate with.
-You need to provide a URL in the `$HOME/.rclip.env` file such as:
-```
-URL=https://blah.amazonaws.com/dev
-```
+To simplify the tool usage, a default backend is provided by the tool maintainer.
+Be aware that the default backend does not make any guarantee regarding the data your provide: it can be accessed publicly. Although the design tries to make it hard, clipboard can theoretically end up being shared (hash collision). Consider encrypting your data, or use your own backend if your data is sensitive.
+Use the default backend at your own risk.
 
-You can choose and deploy a back-end for your own usage:
+To mitigate the default backend weaknesses, it is highly recommended that you choose & deploy your own backend, please see how to:
 https://github.com/noboruma/rclip-backends
 
+To use your own backend, please provide a URL in the `$HOME/.rclip.env` file such as:
+```
+RCLIP_URL=https://blah.amazonaws.com/
+```
 #### Setup demo
 
 <a href="https://asciinema.org/a/340551?loop=1&autoplay=1&speed=3"><img src="https://asciinema.org/a/340551.svg" width="400"/></a>

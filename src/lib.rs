@@ -48,9 +48,9 @@ impl Clipboard {
     ///     base_url: url::Url::parse("https://toto.com").unwrap(),
     ///     token: String::from("token"),
     /// });
-    /// clipboard.push(&mut "toto".as_bytes());
+    /// clipboard.copy(&mut "toto".as_bytes());
     /// ```
-    pub fn push(&self, input: &mut dyn Read) -> Result<(), ClipboardError> {
+    pub fn copy(&self, input: &mut dyn Read) -> Result<(), ClipboardError> {
         let mut url = http::prepare_endpoint(&self.config, COPY_ENDPOINT);
         http::append_query(&mut url, input, &TEXT_PARAM);
         http::get_http(&url)
@@ -70,9 +70,9 @@ impl Clipboard {
     ///     token: String::from("token"),
     /// });
     /// let stdout = io::stdout();
-    /// clipboard.pull(&mut stdout.lock());
+    /// clipboard.paste(&mut stdout.lock());
     /// ```
-    pub fn pull(&self, output: &mut dyn Write) -> Result<(), ClipboardError> {
+    pub fn paste(&self, output: &mut dyn Write) -> Result<(), ClipboardError> {
         let url = http::prepare_endpoint(&self.config, PASTE_ENDPONT);
         let resp = http::get_http_response(&url)?;
         let _ = match resp.get(&String::from(TEXT_PARAM)) {
@@ -162,7 +162,7 @@ mod tests {
         http::get_http.mock_safe(|_url| MockResult::Return(Ok(())));
         let clipboard = Clipboard::from(mocked_config());
 
-        let _ = clipboard.push(&mut "toto".as_bytes());
+        let _ = clipboard.copy(&mut "toto".as_bytes());
     }
 
     #[test]
@@ -173,7 +173,7 @@ mod tests {
         let clipboard = Clipboard::from(mocked_config());
         let stdout = io::stdout();
 
-        let _ = clipboard.pull(&mut stdout.lock());
+        let _ = clipboard.paste(&mut stdout.lock());
     }
 
     #[test]

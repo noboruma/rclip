@@ -17,43 +17,43 @@ fn check_helper() {
 #[test]
 fn check_network_error() {
     let mut cmd = Command::cargo_bin("rclip").unwrap();
-    cmd.args(&["pull"]).env("RCLIP_URL", "https://google.stuff").env("HOME", "/tmp").assert().failure();
+    cmd.args(&["paste"]).env("RCLIP_URL", "https://google.stuff").env("HOME", "/tmp").assert().failure();
 }
 
 #[test]
 fn check_directory_error() {
     let mut cmd = Command::cargo_bin("rclip").unwrap();
-    cmd.args(&["pull"]).env("RCLIP_URL", "https://google.stuff").env("HOME", "").assert().failure();
+    cmd.args(&["paste"]).env("RCLIP_URL", "https://google.stuff").env("HOME", "").assert().failure();
 }
 
 #[test]
 fn check_illformed_url() {
     let mut cmd = Command::cargo_bin("rclip").unwrap();
-    cmd.args(&["pull"]).env("RCLIP_URL", "https://google.").env("HOME", "/tmp").assert().failure();
+    cmd.args(&["paste"]).env("RCLIP_URL", "https://google.").env("HOME", "/tmp").assert().failure();
 }
 
 #[test]
 fn check_no_url() {
     let mut cmd = Command::cargo_bin("rclip").unwrap();
-    cmd.args(&["pull"]).env("HOME", "/tmp").assert().failure();
+    cmd.args(&["paste"]).env("HOME", "/tmp").assert().failure();
 }
 
 #[test]
 fn check_many_args() {
     let mut cmd = Command::cargo_bin("rclip").unwrap();
-    cmd.args(&["pull", "pull", "pull"]).env("RCLIP_URL", "https://google.").env("HOME", "/tmp").assert().failure();
+    cmd.args(&["paste", "paste", "paste"]).env("RCLIP_URL", "https://google.").env("HOME", "/tmp").assert().failure();
 }
 
 #[test]
 fn check_pull_no_backend() {
     let mut cmd = Command::cargo_bin("rclip").unwrap();
-    cmd.args(&["pull"]).env("RCLIP_URL", "https://google.co").env("HOME", "/tmp").assert().failure();
+    cmd.args(&["paste"]).env("RCLIP_URL", "https://google.co").env("HOME", "/tmp").assert().failure();
 }
 
 #[test]
 fn check_push_no_backend() {
     let mut cmd = Command::cargo_bin("rclip").unwrap();
-    cmd.args(&["push", "push"]).env("RCLIP_URL", "https://google.co").env("HOME", "/tmp").assert().success();
+    cmd.args(&["copy", "copy"]).env("RCLIP_URL", "https://google.co").env("HOME", "/tmp").assert().success();
 }
 
 #[test]

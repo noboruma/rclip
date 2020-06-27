@@ -8,7 +8,7 @@ use url::Url;
 #[derive(Debug)]
 pub enum Error {
     DirNotFound(String),
-    URLNotFound,
+    URLNotFound(PathBuf),
     URLIllFormed,
 }
 
@@ -43,7 +43,7 @@ impl ConfigContext {
 
         let url = match dotenv::var(URL_PARAM) {
             Ok(resp) => resp,
-            Err(_) => return Err(Error::URLNotFound),
+            Err(_) => return Err(Error::URLNotFound(config_path)),
         };
 
         let url = match Url::parse(&url) {
