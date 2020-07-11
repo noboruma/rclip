@@ -12,6 +12,7 @@ pub fn prepare_endpoint(config_context: &config::ConfigContext, path: &str) -> U
     return url;
 }
 
+#[cfg(not(target_arch = "wasm32"))]
 #[mockable]
 pub fn get_http_response(url: &Url) -> Result<HashMap<String, String>, ClipboardError>{
     let resp = match reqwest::blocking::get(url.as_str()) {
@@ -24,9 +25,35 @@ pub fn get_http_response(url: &Url) -> Result<HashMap<String, String>, Clipboard
     }
 }
 
+#[cfg(not(target_arch = "wasm32"))]
 #[mockable]
 pub fn get_http(url: &Url) -> Result<(), ClipboardError> {
     match reqwest::blocking::get(url.as_str()) {
+        Ok(_) => Ok(()),
+        Err(_) => return Err(ClipboardError::NetworkError(url.to_string())),
+    }
+}
+
+use futures::executor::block_on;
+
+#[cfg(target_arch = "wasm32")]
+#[mockable]
+pub fn get_http_response(url: &Url) -> Result<HashMap<String, String>, ClipboardError>{
+    let resp = reqwest::get(url.as_str());
+    let resp = match block_on(resp) {
+        Ok(resp) => resp,
+        Err(_) => return Err(ClipboardError::NetworkError(url.to_string())),
+    };
+    return match block_on(resp.json::<HashMap<String, String>>()) {
+        Ok(resp) => Ok(resp),
+        Err(_) => return Err(ClipboardError::BackendError),
+    }
+}
+
+#[cfg(target_arch = "wasm32")]
+#[mockable]
+pub fn get_http(url: &Url) -> Result<(), ClipboardError> {
+    match block_on(reqwest::get(url.as_str())) {
         Ok(_) => Ok(()),
         Err(_) => return Err(ClipboardError::NetworkError(url.to_string())),
     }

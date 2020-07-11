@@ -1,7 +1,7 @@
 use std::io::{self};
 
 pub struct StringStream {
-    inner: String,
+    pub inner: String,
     index: usize,
 }
 
@@ -20,6 +20,17 @@ impl io::Read for StringStream {
         let n = slice.read(buf)?;
         self.index += n;
         return Ok(n)
+    }
+}
+
+impl io::Write for StringStream {
+    fn write(&mut self, buf: &[u8]) -> io::Result<usize> {
+        self.inner.push_str(std::str::from_utf8(&buf).unwrap());
+        return Ok(self.inner.len());
+    }
+
+    fn flush(&mut self) -> io::Result<()>{
+        Ok(())
     }
 }
 

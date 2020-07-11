@@ -2,6 +2,7 @@ use remote_clipboard as rclip;
 use std::env;
 use std::io::{self, Read, Write};
 use std::process;
+use base64;
 
 const HELP: &'static [u8] = br#"
     USAGE:

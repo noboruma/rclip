@@ -23,6 +23,38 @@ pub struct Clipboard {
     pub config: config::ConfigContext,
 }
 
+#[cfg(target_arch = "wasm32")]
+mod js {
+
+    use wasm_bindgen::prelude::*;
+    use super::*;
+
+    fn default_clipboard(token :String) -> Clipboard {
+        let config = config::ConfigContext {
+            config_path: std::path::PathBuf::new(),
+            base_url: url::Url::parse(std::str::from_utf8(&base64::decode("aHR0cHM6Ly9hd3MucmVtb3RlLWNsaXBib2FyZC5uZXQ=").unwrap()).unwrap()).unwrap(),
+            token,
+        };
+        return Clipboard::from(config);
+    }
+
+    #[wasm_bindgen]
+    pub fn copy(token:String, input: String) {
+        let clipboard = default_clipboard(token);
+        let mut ss = stream::StringStream::from(input);
+        clipboard.copy(&mut ss);
+    }
+
+    #[wasm_bindgen]
+    pub fn paste(token: String) -> String {
+        let clipboard = default_clipboard(token);
+        let string = String::new();
+        let mut ss = stream::StringStream::from(string);
+        clipboard.paste(& mut ss);
+        return ss.inner;
+    }
+}
+
 impl Clipboard {
 
     pub fn from(config: config::ConfigContext) -> Clipboard {
