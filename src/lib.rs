@@ -4,10 +4,10 @@ const TEXT_PARAM: &'static str = "text";
 const TOKEN_PARAM: &'static str = "TOKEN";
 const SHORTHASH_PARAM: &'static str = "shortHash";
 pub const URL_PARAM: &'static str = "RCLIP_URL";
-const OPEN_ENDPOINT: &'static str = "dev/open";
-const LINK_ENDPONT: &'static str = "dev/link";
-const COPY_ENDPOINT: &'static str = "dev/push";
-const PASTE_ENDPONT: &'static str = "dev/pull";
+const OPEN_ENDPOINT: &'static str = "open";
+const LINK_ENDPONT: &'static str = "link";
+const COPY_ENDPOINT: &'static str = "push";
+const PASTE_ENDPONT: &'static str = "pull";
 
 pub mod config;
 pub mod stream;
@@ -40,18 +40,17 @@ mod js {
 
     #[wasm_bindgen]
     pub fn copy(token:String, input: String) {
+        console_error_panic_hook::set_once();
         let clipboard = default_clipboard(token);
         let mut ss = stream::StringStream::from(input);
-        clipboard.copy(&mut ss);
+        let _ = clipboard.copy(&mut ss);
     }
 
     #[wasm_bindgen]
-    pub fn paste(token: String) -> String {
+    pub fn paste(token: String, completion: js_sys::Function) -> () {
+        console_error_panic_hook::set_once();
         let clipboard = default_clipboard(token);
-        let string = String::new();
-        let mut ss = stream::StringStream::from(string);
-        clipboard.paste(& mut ss);
-        return ss.inner;
+        clipboard.paste(completion).unwrap();
     }
 }
 
@@ -104,6 +103,7 @@ impl Clipboard {
     /// let stdout = io::stdout();
     /// clipboard.paste(&mut stdout.lock());
     /// ```
+#[cfg(not(target_arch = "wasm32"))]
     pub fn paste(&self, output: &mut dyn Write) -> Result<(), ClipboardError> {
         let url = http::prepare_endpoint(&self.config, PASTE_ENDPONT);
         let resp = http::get_http_response(&url)?;
@@ -111,6 +111,35 @@ impl Clipboard {
             Some(number) => output.write(number.as_ref()),
             _ => output.write(b""),
         };
+        Ok(())
+    }
+
+#[cfg(target_arch = "wasm32")]
+    pub fn paste(&self, completion: js_sys::Function) -> Result<(), ClipboardError> {
+
+        use std::collections::HashMap;
+        use wasm_bindgen::JsValue;
+
+        let func = move |resp : Result<HashMap<String, String>, ClipboardError>| {
+            let this = JsValue::null();
+            match resp {
+                Ok(resp) => {
+                    match resp.get(&String::from(TEXT_PARAM)) {
+                        Some(x) =>  {
+                            let resp = JsValue::from(x);
+                            completion.call1(&this, &resp).unwrap();
+                            return ();
+                        },
+                        None => (),
+                    };
+                },
+                _ => (),
+            };
+            completion.call1(&this, &JsValue::from_str("error")).unwrap();
+        };
+
+        let url = http::prepare_endpoint(&self.config, PASTE_ENDPONT);
+        http::get_http_response_comp(&url, Box::new(func));
         Ok(())
     }
 

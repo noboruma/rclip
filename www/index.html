@@ -2,9 +2,51 @@
 <html>
     <head>
         <meta charset="utf-8">
-        <title>hello-wasm example</title>
+        <title>remote-clipboard</title>
+        <script src="./bundle.js"></script>
+        <script>
+            function setCookie(name, value) {
+                var today = new Date();
+                var expiry = new Date(today.getTime() + 30 * 24 * 3600 * 1000);
+                document.cookie=name + "=" + escape(value) + ";expires=" + expiry.toGMTString() + ";path=/";
+            }
+            function getCookie(name) {
+                if (document.cookie != ""){
+                    cookies = document.cookie.split(";");
+                    for (var i = 0; i < cookies.length; i++) {
+                        cookie = cookies[i].trim().split("=");
+                        if (cookie[0] == name) {
+                            return cookie[1];
+                        }
+                    }
+                }
+                return '';
+            }
+            function handleCopy(token, data) {
+                setCookie("token", token);
+                rclip.handleCopy(token, data);
+            }
+            function handlePaste(token) {
+                setCookie("token", token);
+                rclip.handlePaste(token, function (value) {
+                    document.getElementById("paste").innerHTML = value;
+                });
+            }
+            window.onload = function() {
+                document.getElementById("token").value = getCookie("token");
+            }
+        </script>
+        <script data-ad-client="ca-pub-6692104157572302" async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
     </head>
     <body>
-        <script src="./index.js"></script>
-    </body>
+        <input type="text" name="token" id="token" maxlength="40">
+        <input type="text" name="data" id="data" maxlength="255">
+        <form name="myform" action="javascript:handleCopy(token.value, data.value)">
+            <input name="Submit"  type="submit" value="Copy"/>
+        </form>
+        <form name="myform" action="javascript:handlePaste(token.value)">
+            <input name="Submit"  type="submit" value="Paste"/>
+        </form>
+        <p id="paste"></p>
+  </body>
 </html>

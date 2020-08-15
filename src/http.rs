@@ -2,6 +2,7 @@ use crate::{config, TOKEN_PARAM, ClipboardError};
 use std::collections::HashMap;
 use std::io::Read;
 use url::Url;
+use futures::executor::block_on;
 
 use mocktopus::macros::*;
 
@@ -14,19 +15,6 @@ pub fn prepare_endpoint(config_context: &config::ConfigContext, path: &str) -> U
 
 #[cfg(not(target_arch = "wasm32"))]
 #[mockable]
-pub fn get_http_response(url: &Url) -> Result<HashMap<String, String>, ClipboardError>{
-    let resp = match reqwest::blocking::get(url.as_str()) {
-        Ok(resp) => resp,
-        Err(_) => return Err(ClipboardError::NetworkError(url.to_string())),
-    };
-    match resp.json::<HashMap<String, String>>() {
-        Ok(resp) => Ok(resp),
-        Err(_) => return Err(ClipboardError::BackendError),
-    }
-}
-
-#[cfg(not(target_arch = "wasm32"))]
-#[mockable]
 pub fn get_http(url: &Url) -> Result<(), ClipboardError> {
     match reqwest::blocking::get(url.as_str()) {
         Ok(_) => Ok(()),
@@ -34,9 +22,6 @@ pub fn get_http(url: &Url) -> Result<(), ClipboardError> {
     }
 }
 
-use futures::executor::block_on;
-
-#[cfg(target_arch = "wasm32")]
 #[mockable]
 pub fn get_http_response(url: &Url) -> Result<HashMap<String, String>, ClipboardError>{
     let resp = reqwest::get(url.as_str());
@@ -52,11 +37,33 @@ pub fn get_http_response(url: &Url) -> Result<HashMap<String, String>, Clipboard
 
 #[cfg(target_arch = "wasm32")]
 #[mockable]
+pub fn get_http_response_comp(url: &Url, completion: Box<dyn Fn(Result<HashMap<String, String>, ClipboardError>)>) {
+
+    use wasm_bindgen_futures::spawn_local;
+    let boxed = Box::from(url.clone());
+    spawn_local(async move {
+        let resp = match (reqwest::get(boxed.as_str())).await {
+            Ok(resp) => resp,
+            Err(_) => return (),
+        };
+        let resp = match resp.json::<HashMap<String, String>>().await {
+            Ok(resp) => Ok(resp),
+            Err(_) => return (),
+        };
+        completion(resp);
+    });
+}
+
+#[cfg(target_arch = "wasm32")]
+#[mockable]
 pub fn get_http(url: &Url) -> Result<(), ClipboardError> {
-    match block_on(reqwest::get(url.as_str())) {
-        Ok(_) => Ok(()),
-        Err(_) => return Err(ClipboardError::NetworkError(url.to_string())),
-    }
+    use wasm_bindgen_futures::spawn_local;
+
+    let boxed = Box::from(url.clone());
+    spawn_local(async move {
+        let _db = (reqwest::get(boxed.as_str())).await;
+    });
+    Ok(())
 }
 
 pub fn append_query(url: &mut Url, input: &mut dyn Read, param: &str) {
