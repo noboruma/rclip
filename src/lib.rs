@@ -39,6 +39,29 @@ mod js {
     }
 
     #[wasm_bindgen]
+    pub fn open(completion: js_sys::Function) -> () {
+        console_error_panic_hook::set_once();
+        let clipboard = default_clipboard(String::new());
+
+        use wasm_bindgen::JsValue;
+
+        let completion = move |resp : Result<String, ClipboardError>| {
+            let this = JsValue::null();
+            match resp {
+                Ok(resp) => {
+                    let resp = JsValue::from(resp);
+                    completion.call1(&this, &resp).unwrap();
+                    return ();
+                },
+                _ => (),
+            };
+            completion.call1(&this, &JsValue::from_str("error")).unwrap();
+        };
+
+        clipboard.open_comp(Box::new(completion)).unwrap();
+    }
+
+    #[wasm_bindgen]
     pub fn copy(token:String, input: String) {
         console_error_panic_hook::set_once();
         let clipboard = default_clipboard(token);
@@ -50,7 +73,23 @@ mod js {
     pub fn paste(token: String, completion: js_sys::Function) -> () {
         console_error_panic_hook::set_once();
         let clipboard = default_clipboard(token);
-        clipboard.paste(completion).unwrap();
+
+        use wasm_bindgen::JsValue;
+
+        let completion = move |resp : Result<String, ClipboardError>| {
+            let this = JsValue::null();
+            match resp {
+                Ok(resp) => {
+                    let resp = JsValue::from(resp);
+                    completion.call1(&this, &resp).unwrap();
+                    return ();
+                },
+                _ => (),
+            };
+            completion.call1(&this, &JsValue::from_str("error")).unwrap();
+        };
+
+        clipboard.paste_comp(Box::new(completion)).unwrap();
     }
 }
 
@@ -101,9 +140,8 @@ impl Clipboard {
     ///     token: String::from("token"),
     /// });
     /// let stdout = io::stdout();
-    /// clipboard.paste(&mut stdout.lock());
+    /// //clipboard.paste(&mut stdout.lock());
     /// ```
-#[cfg(not(target_arch = "wasm32"))]
     pub fn paste(&self, output: &mut dyn Write) -> Result<(), ClipboardError> {
         let url = http::prepare_endpoint(&self.config, PASTE_ENDPONT);
         let resp = http::get_http_response(&url)?;
@@ -114,38 +152,32 @@ impl Clipboard {
         Ok(())
     }
 
-#[cfg(target_arch = "wasm32")]
-    pub fn paste(&self, completion: js_sys::Function) -> Result<(), ClipboardError> {
+    pub fn paste_comp(&self, completion: Box<dyn Fn(Result<String, ClipboardError>)>) -> Result<(), ClipboardError> {
 
         use std::collections::HashMap;
-        use wasm_bindgen::JsValue;
-
-        let func = move |resp : Result<HashMap<String, String>, ClipboardError>| {
-            let this = JsValue::null();
+        let wrapper = move |resp : Result<HashMap<String, String>, ClipboardError>| {
             match resp {
                 Ok(resp) => {
                     match resp.get(&String::from(TEXT_PARAM)) {
                         Some(x) =>  {
-                            let resp = JsValue::from(x);
-                            completion.call1(&this, &resp).unwrap();
-                            return ();
+                            return completion(Ok(x.to_string()));
                         },
                         None => (),
                     };
                 },
                 _ => (),
             };
-            completion.call1(&this, &JsValue::from_str("error")).unwrap();
+            completion(Err(ClipboardError::BackendError));
         };
 
         let url = http::prepare_endpoint(&self.config, PASTE_ENDPONT);
-        http::get_http_response_comp(&url, Box::new(func));
+        http::get_http_response_comp(&url, Box::new(wrapper));
         Ok(())
     }
 
     /// Open a new remote clipboard
-    /// and display a short living hash for linking
-    /// another client.
+    /// And generate new token if needed
+    /// The function is synchronous
     /// # Example
     ///
     /// ```
@@ -157,7 +189,7 @@ impl Clipboard {
     ///     base_url: url::Url::parse("https://toto.com").unwrap(),
     ///     token: String::from("token"),
     /// });
-    /// clipboard.open();
+    /// //clipboard.open();
     /// ```
     pub fn open(&mut self) -> Result<(), ClipboardError> {
         let url = http::prepare_endpoint(&self.config, OPEN_ENDPOINT);
@@ -166,6 +198,29 @@ impl Clipboard {
             Some(token) => { self.config.token = token.clone(); Ok(()) },
             _ => Err(ClipboardError::BackendError)
         }
+    }
+
+    pub fn open_comp(&self, completion: Box<dyn Fn(Result<String, ClipboardError>)>) -> Result<(), ClipboardError> {
+
+        use std::collections::HashMap;
+        let wrapper = move |resp : Result<HashMap<String, String>, ClipboardError>| {
+            match resp {
+                Ok(resp) => {
+                    match resp.get(&String::from(TEXT_PARAM)) {
+                        Some(x) =>  {
+                            return completion(Ok(x.to_string()));
+                        },
+                        None => (),
+                    };
+                },
+                _ => (),
+            };
+            completion(Err(ClipboardError::BackendError));
+        };
+
+        let url = http::prepare_endpoint(&self.config, OPEN_ENDPOINT);
+        http::get_http_response_comp(&url, Box::new(wrapper));
+        Ok(())
     }
 
     /// Link against newly opened remote clipboard
@@ -186,7 +241,7 @@ impl Clipboard {
     ///     base_url: url::Url::parse("https://toto.com").unwrap(),
     ///     token: String::from("token"),
     /// });
-    /// clipboard.link(&mut "012345".as_bytes());
+    /// //clipboard.link(&mut "012345".as_bytes());
     /// ```
     /// TODO: check input size
     pub fn link(&mut self, input: &mut dyn Read) -> Result<(), ClipboardError> {

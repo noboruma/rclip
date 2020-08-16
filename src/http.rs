@@ -35,20 +35,29 @@ pub fn get_http_response(url: &Url) -> Result<HashMap<String, String>, Clipboard
     }
 }
 
+#[cfg(not(target_arch = "wasm32"))]
+pub fn execute<F: futures::Future>(completion : F) {
+    block_on(completion);
+}
+
 #[cfg(target_arch = "wasm32")]
+pub fn execute<F: 'static + futures::Future<Output = ()>>(completion : F) {
+    use wasm_bindgen_futures::spawn_local;
+    spawn_local(completion);
+}
+
 #[mockable]
 pub fn get_http_response_comp(url: &Url, completion: Box<dyn Fn(Result<HashMap<String, String>, ClipboardError>)>) {
 
-    use wasm_bindgen_futures::spawn_local;
     let boxed = Box::from(url.clone());
-    spawn_local(async move {
+    execute(async move {
         let resp = match (reqwest::get(boxed.as_str())).await {
             Ok(resp) => resp,
-            Err(_) => return (),
+            Err(_) => return completion(Err(ClipboardError::NetworkError(boxed.to_string()))),
         };
         let resp = match resp.json::<HashMap<String, String>>().await {
             Ok(resp) => Ok(resp),
-            Err(_) => return (),
+            Err(_) => Err(ClipboardError::BackendError),
         };
         completion(resp);
     });

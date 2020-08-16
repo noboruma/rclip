@@ -4,49 +4,75 @@
         <meta charset="utf-8">
         <title>remote-clipboard</title>
         <script src="./bundle.js"></script>
+        <script src="./utils.js"></script>
+        <script data-ad-client="ca-pub-6692104157572302" async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+        <link rel="stylesheet" href="styles.css">
         <script>
-            function setCookie(name, value) {
-                var today = new Date();
-                var expiry = new Date(today.getTime() + 30 * 24 * 3600 * 1000);
-                document.cookie=name + "=" + escape(value) + ";expires=" + expiry.toGMTString() + ";path=/";
-            }
-            function getCookie(name) {
-                if (document.cookie != ""){
-                    cookies = document.cookie.split(";");
-                    for (var i = 0; i < cookies.length; i++) {
-                        cookie = cookies[i].trim().split("=");
-                        if (cookie[0] == name) {
-                            return cookie[1];
-                        }
-                    }
-                }
-                return '';
-            }
-            function handleCopy(token, data) {
-                setCookie("token", token);
-                rclip.handleCopy(token, data);
-            }
-            function handlePaste(token) {
-                setCookie("token", token);
-                rclip.handlePaste(token, function (value) {
-                    document.getElementById("paste").innerHTML = value;
-                });
-            }
             window.onload = function() {
-                document.getElementById("token").value = getCookie("token");
+                document.getElementById("contentPaste").style.display = "none";
+                var url = new URL(document.location);
+                var token = url.searchParams.get("token");
+                if (token) {
+                    document.getElementById("token").value = token;
+                } else {
+                    document.getElementById("token").value = getCookie("token");
+                }
             }
         </script>
-        <script data-ad-client="ca-pub-6692104157572302" async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
     </head>
     <body>
-        <input type="text" name="token" id="token" maxlength="40">
-        <input type="text" name="data" id="data" maxlength="255">
-        <form name="myform" action="javascript:handleCopy(token.value, data.value)">
-            <input name="Submit"  type="submit" value="Copy"/>
-        </form>
-        <form name="myform" action="javascript:handlePaste(token.value)">
-            <input name="Submit"  type="submit" value="Paste"/>
-        </form>
-        <p id="paste"></p>
+        <header>
+            <div id="logo"><a href="https://www.remote-clipboard.net/" class="logo">Remote Clipboard</a></div>
+        </header>
+        <br>
+        <main>
+            <section id="clipbox">
+                <h1>Enter the clipboard token and save or retrieve associated content</h1>
+
+                <label for="token">Token:</label>
+                <input type="text" name="token" id="token" maxlength="40" placeholder="Enter token" required>
+
+                <label for="content">Content:</label>
+                <textarea type="text" rows="1" name="content" id="content" maxlength="255" placeholder="Enter content"></textarea>
+
+                <br>
+                <br>
+
+                <button id="generateButton" onclick="javascript:handleGenerate(document.getElementById('token'), generateButton)">Get token</button>
+                <button id="copyButton" onclick="javascript:handleCopy(token.value, copyButton, document.getElementById('content'))">Copy</button>
+                <button id="pasteButton" onclick="javascript:handlePaste(token.value, pasteButton, document.getElementById('contentPaste'), document.getElementById('paste'))">Paste</button>
+                <button id="shareButton" onclick="javascript:shareClipboard(token.value, shareButton)">Share</button>
+
+                <p class="boxfooter">remote-clipboard.net is a free tool to copy and paste content given a token.</p>
+            </section>
+
+            <br>
+            <br>
+
+            <section id="contentPaste">
+                <textarea id="paste"></textarea>
+                <br>
+                <button id="copyContentButton" onclick="copyContent(document.getElementById('paste'), document.getElementById('copyContentButton'))">Copy to local clipboard</button>
+            </section>
+
+            <section id="clipbox">
+                <p>Remote clipboard allows users to store & retrieve data given a token.</p>
+                <p>Content is safely transmitted to our service, but everybody having the token can access the same data. Please use that tool with this in mind. Do not copy information that are sensitive.</p> 
+                <p>The token acts as an identifier, by sharing that identifier, you can start sharing the data. Typical use case is for short-lived data. If you want to share some content quickly across multiple hosts, this tool makes it possible. For convenience, users are kept anonymous, the pros is that there is no setup required to use the tool. The cons is that your content is not securely stored. That being said, your data can be erased whenever you want, our back-end is not duplicating any content. If you want to use this tool in a secure way (only you can access the data), then please consider installing your own <a href="https://github.com/noboruma/rclip-backends">back-end</a></p>
+                <p>The tool comes into two falvors, a web interface and a <a href="cli.html">command line interface.</a></p>
+            </section>
+        </main>
+        <footer>
+            <div id="footerbox">
+                <div>© 2020 remote-clipboard.net - Tool to store short lived content.</div>
+                <ul>
+                    <li><a href="index.html">Web Interface</a></li>
+                    <li>|</li>
+                    <li><a href="cli.html">Command Line Interface</a></li>
+                    <li>|</li>
+                    <li><a href="mailto:nobody@nobody.com">Contact</a></li>
+                </ul>
+            </div>
+        </footer>
   </body>
 </html>

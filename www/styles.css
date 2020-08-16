@@ -1,0 +1,99 @@
+.make-background-grey { background-color: grey}
+body {
+    margin: 0;
+    text-align: center;
+    font: 16px asap,arial,tahoma;
+    box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+}
+section .boxfooter {
+    margin: 10px auto 20px;
+    text-align: center;
+    max-width: 620px;
+}
+button {
+    border-color: currentcolor;
+    height: 20px;
+    color: #fff;
+    background-color: #cf45c5;
+    text-align: center;
+    vertical-align: middle;
+    cursor: pointer;
+    white-space: nowrap;
+    border: 0;
+    border-top-color: currentcolor;
+    border-right-color: currentcolor;
+    border-bottom-color: currentcolor;
+    border-left-color: currentcolor;
+    border-radius: 3px;
+    border-top-left-radius: 3px;
+    border-bottom-left-radius: 3px;
+    border-top-left-radius: 3px;
+    border-bottom-left-radius: 3px;
+    margin-left: -1px;
+    -webkit-appearance: button;
+    margin: 0;
+}
+footer {
+    text-align: center;
+    line-height: normal;
+    background: #333;
+    background-color: rgb(81, 51, 51);
+    background-image: none;
+    width: 100%;
+    border-top: 6px solid #af25a5;
+    padding: 20px 0 100px;
+    line-height: 1.5;
+    color: rgb(150, 150, 150);
+    background-image: none;
+    position: absolute;
+    bottom: 0;
+    height: 10px;
+    margin: 0;
+}
+footer ul li {
+    display: inline;
+}
+footer ul li a {
+    color: rgb(60, 120, 180);
+}
+section#clipbox {
+    box-shadow: rgb(184, 180, 174) 0px 2px 8px;
+    background-image: none;
+    margin: 0 auto 20px auto;
+    max-width: 700px;
+    box-shadow: 0 1px 4px #ccc;
+    border-radius: 2px;
+    padding: 10px 30px 5px;
+    background: #fff;
+    background-color: rgb(255, 255, 255);
+    background-image: none;
+    text-align: center;
+}
+main {
+    display: block;
+    margin: 0 auto 0 auto;
+    padding: 0 20px;
+    max-width: 800px;
+}
+header a.logo {
+    font: 900 49px asap,arial;
+    color: #cf45c5;
+    letter-spacing: -1px;
+    text-shadow: 0 2px 2px #ddd;
+    word-wrap: break-word;
+    text-decoration: none;
+    text-decoration-line: none;
+    text-decoration-style: solid;
+    text-decoration-color: currentcolor;
+    text-decoration-thickness: auto;
+}
+header a.logo:hover {
+    text-decoration: none;
+    text-decoration-line: none;
+    text-decoration-style: solid;
+    text-decoration-color: currentcolor;
+    text-decoration-thickness: auto;
+}
+
