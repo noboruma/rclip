@@ -75,7 +75,6 @@ fn construct_clipboard(stdout: &mut io::Stdout) -> rclip::Clipboard {
 }
 
 fn main() {
-
     let mut stdout = io::stdout();
     let stdin  = io::stdin();
 
