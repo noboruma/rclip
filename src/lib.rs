@@ -13,6 +13,9 @@ pub mod config;
 pub mod stream;
 mod http;
 
+#[cfg(target_arch = "wasm32")]
+pub mod js;
+
 #[derive(Debug)]
 pub enum ClipboardError {
     NetworkError(String),
@@ -21,76 +24,6 @@ pub enum ClipboardError {
 
 pub struct Clipboard {
     pub config: config::ConfigContext,
-}
-
-#[cfg(target_arch = "wasm32")]
-mod js {
-
-    use wasm_bindgen::prelude::*;
-    use super::*;
-
-    fn default_clipboard(token :String) -> Clipboard {
-        let config = config::ConfigContext {
-            config_path: std::path::PathBuf::new(),
-            base_url: url::Url::parse(std::str::from_utf8(&base64::decode("aHR0cHM6Ly9hd3MucmVtb3RlLWNsaXBib2FyZC5uZXQ=").unwrap()).unwrap()).unwrap(),
-            token,
-        };
-        return Clipboard::from(config);
-    }
-
-    #[wasm_bindgen]
-    pub fn open(completion: js_sys::Function) -> () {
-        console_error_panic_hook::set_once();
-        let clipboard = default_clipboard(String::new());
-
-        use wasm_bindgen::JsValue;
-
-        let completion = move |resp : Result<String, ClipboardError>| {
-            let this = JsValue::null();
-            match resp {
-                Ok(resp) => {
-                    let resp = JsValue::from(resp);
-                    completion.call1(&this, &resp).unwrap();
-                    return ();
-                },
-                _ => (),
-            };
-            completion.call1(&this, &JsValue::from_str("error")).unwrap();
-        };
-
-        clipboard.open_comp(Box::new(completion)).unwrap();
-    }
-
-    #[wasm_bindgen]
-    pub fn copy(token:String, input: String) {
-        console_error_panic_hook::set_once();
-        let clipboard = default_clipboard(token);
-        let mut ss = stream::StringStream::from(input);
-        let _ = clipboard.copy(&mut ss);
-    }
-
-    #[wasm_bindgen]
-    pub fn paste(token: String, completion: js_sys::Function) -> () {
-        console_error_panic_hook::set_once();
-        let clipboard = default_clipboard(token);
-
-        use wasm_bindgen::JsValue;
-
-        let completion = move |resp : Result<String, ClipboardError>| {
-            let this = JsValue::null();
-            match resp {
-                Ok(resp) => {
-                    let resp = JsValue::from(resp);
-                    completion.call1(&this, &resp).unwrap();
-                    return ();
-                },
-                _ => (),
-            };
-            completion.call1(&this, &JsValue::from_str("error")).unwrap();
-        };
-
-        clipboard.paste_comp(Box::new(completion)).unwrap();
-    }
 }
 
 impl Clipboard {
@@ -142,6 +75,7 @@ impl Clipboard {
     /// let stdout = io::stdout();
     /// //clipboard.paste(&mut stdout.lock());
     /// ```
+    #[cfg(not(target_arch = "wasm32"))]
     pub fn paste(&self, output: &mut dyn Write) -> Result<(), ClipboardError> {
         let url = http::prepare_endpoint(&self.config, PASTE_ENDPONT);
         let resp = http::get_http_response(&url)?;
@@ -191,6 +125,7 @@ impl Clipboard {
     /// });
     /// //clipboard.open();
     /// ```
+    #[cfg(not(target_arch = "wasm32"))]
     pub fn open(&mut self) -> Result<(), ClipboardError> {
         let url = http::prepare_endpoint(&self.config, OPEN_ENDPOINT);
         let resp = http::get_http_response(&url)?;
@@ -244,6 +179,7 @@ impl Clipboard {
     /// //clipboard.link(&mut "012345".as_bytes());
     /// ```
     /// TODO: check input size
+    #[cfg(not(target_arch = "wasm32"))]
     pub fn link(&mut self, input: &mut dyn Read) -> Result<(), ClipboardError> {
         let mut url = http::prepare_endpoint(&self.config, LINK_ENDPONT);
         http::append_query(&mut url, input, SHORTHASH_PARAM);
