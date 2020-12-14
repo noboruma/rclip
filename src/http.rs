@@ -2,7 +2,6 @@ use crate::{config, TOKEN_PARAM, ClipboardError};
 use std::collections::HashMap;
 use std::io::Read;
 use url::Url;
-use futures::executor::block_on;
 
 use mocktopus::macros::*;
 
@@ -22,14 +21,15 @@ pub fn get_http(url: &Url) -> Result<(), ClipboardError> {
     }
 }
 
+#[cfg(not(target_arch = "wasm32"))]
 #[mockable]
 pub fn get_http_response(url: &Url) -> Result<HashMap<String, String>, ClipboardError>{
-    let resp = reqwest::get(url.as_str());
-    let resp = match block_on(resp) {
+    let resp = reqwest::blocking::get(url.as_str());
+    let resp = match resp {
         Ok(resp) => resp,
         Err(_) => return Err(ClipboardError::NetworkError(url.to_string())),
     };
-    return match block_on(resp.json::<HashMap<String, String>>()) {
+    return match resp .json::<HashMap<String, String>>() {
         Ok(resp) => Ok(resp),
         Err(_) => return Err(ClipboardError::BackendError),
     }
@@ -37,7 +37,7 @@ pub fn get_http_response(url: &Url) -> Result<HashMap<String, String>, Clipboard
 
 #[cfg(not(target_arch = "wasm32"))]
 pub fn execute<F: futures::Future>(completion : F) {
-    block_on(completion);
+    futures::executor::block_on(completion);
 }
 
 #[cfg(target_arch = "wasm32")]
