@@ -34,11 +34,24 @@ pub fn open(completion: js_sys::Function) -> () {
 }
 
 #[wasm_bindgen]
-pub fn copy(token:String, input: String) {
+pub fn copy(token:String, input: String, completion: js_sys::Function) {
     console_error_panic_hook::set_once();
     let clipboard = default_clipboard(token);
     let mut ss = stream::StringStream::from(input);
-    let _ = clipboard.copy(&mut ss);
+
+    let completion = move |resp : Result<(), ClipboardError>| {
+        let this = JsValue::null();
+        match resp {
+            Ok(_) => {
+                completion.call0(&this).unwrap();
+                return ();
+            },
+            _ => (),
+        };
+        completion.call1(&this, &JsValue::from_str("error")).unwrap();
+    };
+
+    let _ = clipboard.copy_comp(&mut ss, Box::new(completion));
 }
 
 #[wasm_bindgen]

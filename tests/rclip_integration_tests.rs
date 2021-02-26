@@ -17,13 +17,13 @@ fn check_helper() {
 #[test]
 fn check_network_error() {
     let mut cmd = Command::cargo_bin("rclip").unwrap();
-    cmd.args(&["paste"]).env("RCLIP_URL", "https://google.stuff").env("HOME", "/tmp").assert().failure();
+    cmd.args(&["paste"]).env("RCLIP_URL", "https://google.com").env("HOME", "/tmp").assert().failure();
 }
 
 #[test]
 fn check_directory_error() {
     let mut cmd = Command::cargo_bin("rclip").unwrap();
-    cmd.args(&["paste"]).env("RCLIP_URL", "https://google.stuff").env("HOME", "").assert().failure();
+    cmd.args(&["paste"]).env("RCLIP_URL", "https://google.com").env("HOME", "").assert().failure();
 }
 
 #[test]

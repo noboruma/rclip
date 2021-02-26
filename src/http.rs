@@ -5,34 +5,13 @@ use url::Url;
 
 use mocktopus::macros::*;
 
+type HttpCompletionFn = dyn FnOnce(Result<HashMap<String, String>, ClipboardError>);
+
 pub fn prepare_endpoint(config_context: &config::ConfigContext, path: &str) -> Url {
     let mut url = config_context.base_url.clone();
     url.set_path(path);
     append_query(&mut url, &mut config_context.token.as_bytes(), &TOKEN_PARAM);
     return url;
-}
-
-#[cfg(not(target_arch = "wasm32"))]
-#[mockable]
-pub fn get_http(url: &Url) -> Result<(), ClipboardError> {
-    match reqwest::blocking::get(url.as_str()) {
-        Ok(_) => Ok(()),
-        Err(_) => return Err(ClipboardError::NetworkError(url.to_string())),
-    }
-}
-
-#[cfg(not(target_arch = "wasm32"))]
-#[mockable]
-pub fn get_http_response(url: &Url) -> Result<HashMap<String, String>, ClipboardError>{
-    let resp = reqwest::blocking::get(url.as_str());
-    let resp = match resp {
-        Ok(resp) => resp,
-        Err(_) => return Err(ClipboardError::NetworkError(url.to_string())),
-    };
-    return match resp .json::<HashMap<String, String>>() {
-        Ok(resp) => Ok(resp),
-        Err(_) => return Err(ClipboardError::BackendError),
-    }
 }
 
 #[cfg(not(target_arch = "wasm32"))]
@@ -47,7 +26,7 @@ pub fn execute<F: 'static + futures::Future<Output = ()>>(completion : F) {
 }
 
 #[mockable]
-pub fn get_http_response_comp(url: &Url, completion: Box<dyn Fn(Result<HashMap<String, String>, ClipboardError>)>) {
+pub fn get_http_response_comp(url: &Url, completion: Box<HttpCompletionFn>) {
 
     let boxed = Box::from(url.clone());
     execute(async move {
@@ -61,18 +40,6 @@ pub fn get_http_response_comp(url: &Url, completion: Box<dyn Fn(Result<HashMap<S
         };
         completion(resp);
     });
-}
-
-#[cfg(target_arch = "wasm32")]
-#[mockable]
-pub fn get_http(url: &Url) -> Result<(), ClipboardError> {
-    use wasm_bindgen_futures::spawn_local;
-
-    let boxed = Box::from(url.clone());
-    spawn_local(async move {
-        let _db = (reqwest::get(boxed.as_str())).await;
-    });
-    Ok(())
 }
 
 pub fn append_query(url: &mut Url, input: &mut dyn Read, param: &str) {

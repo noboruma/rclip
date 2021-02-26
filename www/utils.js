@@ -58,10 +58,9 @@ function handleCopy(token, button, content) {
 
     toggleButton(false, button, "Copying...");
     setCookie("token", token);
-    rclip.handleCopy(token, content.value);
-    setTimeout(function() {
+    rclip.handleCopy(token, content.value, function() {
         toggleButton(true, button, "Copy");
-    }, 500);
+    });
 }
 function handlePaste(token, button, pasteSection, pasteOutput) {
     if (token.length == 0) return;

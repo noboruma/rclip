@@ -3,7 +3,7 @@ const WasmPackPlugin = require('@wasm-tool/wasm-pack-plugin');
 module.exports = {
   entry: "./lib.js",
   output: {
-    path: path.resolve(__dirname, "dist"),
+    path: path.resolve(__dirname, "./dist"),
     filename: "bundle.js",
     library: 'rclip',
     libraryTarget: 'var',

@@ -48,6 +48,7 @@ fn fail_error(res: &Result<(), rclip::ClipboardError>) {
     match res {
         Err(rclip::ClipboardError::BackendError) => fail("Failed to use clipboard with the backend (Is it opened/linked?)"),
         Err(rclip::ClipboardError::NetworkError(url)) => fail(("Failed to contact the backend: ".to_string()+&url).as_str()),
+        Err(rclip::ClipboardError::AwaitError) => fail("Async failure"),
         Ok(_) => {},
     }
 }
@@ -74,7 +75,8 @@ fn construct_clipboard(stdout: &mut io::Stdout) -> rclip::Clipboard {
     return rclip::Clipboard::from(config);
 }
 
-fn main() {
+#[tokio::main]
+async fn main() {
     let mut stdout = io::stdout();
     let stdin  = io::stdin();
 

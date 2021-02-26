@@ -8,9 +8,9 @@ module.exports = {
             lib.open(callback);
         });
     },
-    handleCopy: function(token, data) {
+    handleCopy: function(token, data, callback) {
         import("../pkg").then(lib => {
-            lib.copy(token, data);
+            lib.copy(token, data, callback);
         });
     },
     handlePaste: function(token, callback) {
