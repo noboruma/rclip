@@ -1,5 +1,8 @@
 require('file-loader?name=[name].[ext]!./index.html');
 require('file-loader?name=[name].[ext]!./cli.html');
+require('file-loader?name=[name].[ext]!./success.html');
+require('file-loader?name=[name].[ext]!./cancel.html');
+require('file-loader?name=[name].[ext]!./footer.html');
 require('file-loader?name=[name].[ext]!./styles.css');
 require('file-loader?name=[name].[ext]!./utils.js');
 module.exports = {

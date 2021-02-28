@@ -1,0 +1,62 @@
+<html>
+  <head>
+      <meta charset="utf-8">
+      <link rel="stylesheet" href="styles.css">
+      <title>Thanks for your order!</title>
+      <script src="https://code.jquery.com/jquery-3.3.1.js" integrity="sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60=" crossorigin="anonymous"></script>
+      <script>
+          $(function(){ $("footer").load("footer.html") });
+      </script>
+      <script>
+          const urlParams = new URLSearchParams(window.location.search);
+          const sessionId = urlParams.get("session_id")
+          let customerId;
+
+          if (sessionId) {
+            fetch("https://aws.remote-clipboard.net/checkout_session?sessionId=" + sessionId)
+                .then(function(result){
+                              return result.json()
+                          })
+                .then(function(session){
+                              customerId = session.customer;
+                              var sessionJSON = JSON.stringify(session, null, 2);
+                              document.querySelector("pre").textContent = sessionJSON;
+                          })
+                .catch(function(err){
+                              console.log('Error when fetching Checkout session', err);
+                  });
+            }
+            const manageBillingForm = document.querySelector('#manage-billing-form');
+            manageBillingForm.addEventListener('submit', function(e) {
+                      e.preventDefault();
+                      fetch('https://aws.remote-clipboard.net/customer_portal', {
+                                method: 'POST',
+                                headers: {
+                                      'Content-Type': 'application/json',
+                                  },
+                                body: JSON.stringify({
+                                       sessionId: sessionId
+                                  }),
+                            })
+                          .then((response) => response.json())
+                          .then((data) => {
+                                window.location.href = data.url;
+                            })
+                          .catch((error) => {
+                                console.error('Error:', error);
+                            });
+                          });
+      </script>
+  </head>
+  <body>
+    <h1>Thanks for your order!</h1>
+    <p>
+      Please check your emails, we are sending your account password.
+      If you have any questions, please contact us.
+    </p>
+    <form id="manage-billing-form">
+        <button>Manage Billing</button>
+    </form>
+  <footer></footer>
+  </body>
+</html>

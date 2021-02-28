@@ -5,7 +5,6 @@
         <title>remote-clipboard</title>
         <script src="./bundle.js"></script>
         <script src="./utils.js"></script>
-        <script data-ad-client="ca-pub-6692104157572302" async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
         <link rel="stylesheet" href="styles.css">
         <script src="https://js.stripe.com/v3/"></script>
         <script>
@@ -18,21 +17,34 @@
                 } else {
                     document.getElementById("token").value = getCookie("token");
                 }
-                var stripe = Stripe('pk_test_51HnphKL0K0gJMCg8Fgje3Pv8REFRR355kYfliXuLBgT3E3Tzg9GvOvAeH1u7kxKn5ACI01x8ddJJEYawzdcKNTsZ00tvG000MF', {
-                    apiVersion: "2020-08-27",
-                });
-                var paymentRequest = stripe.paymentRequest({
-                  country: 'US',
-                  currency: 'usd',
-                  total: {
-                    label: 'Demo total',
-                    amount: 5,
-                  },
-                  requestPayerName: true,
-                  requestPayerEmail: true,
-                });
+                var stripe = Stripe('pk_test_51HnphKL0K0gJMCg8Fgje3Pv8REFRR355kYfliXuLBgT3E3Tzg9GvOvAeH1u7kxKn5ACI01x8ddJJEYawzdcKNTsZ00tvG000MF');
+                var checkoutButton = document.getElementById('checkout-button');
+                checkoutButton.addEventListener('click', function() {
+                        fetch('https://aws.remote-clipboard.net/checkout_namespace', {
+                                        method: 'POST',
+                                    })
+                        .then(function(response) {
+                                        return response.json();
+                                    })
+                        .then(function(session) {
+                                        return stripe.redirectToCheckout({ sessionId: session.id });
+                                    })
+                        .then(function(result) {
+                                        if (result.error) {
+                                            alert(result.error.message);
+                                        }
+                                    })
+                        .catch(function(error) {
+                            console.error('Error:', error);
+                        });
+                    });
             }
         </script>
+        <script src="https://code.jquery.com/jquery-3.3.1.js" integrity="sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60=" crossorigin="anonymous"></script>
+        <script>
+            $(function(){ $("footer").load("footer.html") });
+        </script>
+    </head>
     <body>
         <header>
             <div id="logo"><a href="https://www.remote-clipboard.net/" class="logo">Remote Clipboard</a></div>
@@ -73,22 +85,11 @@
                 <p>Content is safely transmitted to our service, but everybody having the token can access the same data. Please use that tool with this in mind. Do not copy information that are sensitive.</p>
                 <p>The token acts as an identifier, by sharing that identifier, you can start sharing the data. Typical use case is for short-lived data. If you want to share some content quickly across multiple hosts, this tool makes it possible. For convenience, users are kept anonymous, the pros is that there is no setup required to use the tool. The cons is that your content is not securely stored. That being said, your data can be erased whenever you want, our back-end is not duplicating any content. If you want to use this tool in a secure way (only you can access the data), then please consider installing your own <a href="https://github.com/noboruma/rclip-backends">back-end</a></p>
                 <p>The tool comes into two falvors, a web interface and a <a href="cli.html">command line interface.</a></p>
+
+                <p> If you want to pass senstive data, please consider purchasing a custom namespace. Namespace are private and only accessible via a registered account.</p>
+                <button id="checkout-button">Subscribe your private namespace</button>
             </section>
-            <div id="payment-request-button">
-              <!-- A Stripe Element will be inserted here. -->
-            </div>   </head>
         </main>
-        <footer>
-            <div id="footerbox">
-                <div>© 2020 remote-clipboard.net - Tool to store short lived content.</div>
-                <ul>
-                    <li><a href="index.html">Web Interface</a></li>
-                    <li>|</li>
-                    <li><a href="cli.html">Command Line Interface</a></li>
-                    <li>|</li>
-                    <li><a href="mailto:nobody@nobody.com">Contact</a></li>
-                </ul>
-            </div>
-        </footer>
+        <footer></footer>
   </body>
 </html>

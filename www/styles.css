@@ -47,7 +47,7 @@ footer {
     line-height: 1.5;
     color: rgb(150, 150, 150);
     background-image: none;
-    position: absolute;
+    position: relative;
     bottom: 0;
     height: 10px;
     margin: 0;

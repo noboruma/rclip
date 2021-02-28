@@ -6,6 +6,10 @@
         <title>remote-clipboard</title>
         <script src="./bundle.js"></script>
         <link rel="stylesheet" href="styles.css">
+        <script src="https://code.jquery.com/jquery-3.3.1.js" integrity="sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60=" crossorigin="anonymous"></script>
+        <script>
+            $(function(){ $("footer").load("footer.html") });
+        </script>
     </head>
     <body>
         <header>
@@ -21,17 +25,6 @@
                 <p>The CLI is ideal for environment that don't have a graphical environment, since clipboard are handled by GUI. This tool aims at removing this gap, while keeping the API simple and somewhat secure. Please keep in mind that your content is not identified, meaning anyone can potentially access it or erase it. In practise, this should never occur.</p>
             </section>
         </main>
-        <footer>
-            <div id="footerbox">
-                <div>© 2020 remote-clipboard.net - Tool to store short lived content.</div>
-                <ul>
-                    <li><a href="index.html">Web Interface</a></li>
-                    <li>|</li>
-                    <li><a href="cli.html">Command Line Interface</a></li>
-                    <li>|</li>
-                    <li><a href="mailto:nobody@nobody.com">Contact</a></li>
-                </ul>
-            </div>
-        </footer>
+        <footer></footer>
   </body>
 </html>

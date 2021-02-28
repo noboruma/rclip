@@ -4,9 +4,10 @@
 [![codecov](https://codecov.io/gh/noboruma/rclip/branch/master/graph/badge.svg)](https://codecov.io/gh/noboruma/rclip)
 [![crates.io](https://img.shields.io/crates/v/remote-clipboard.svg)](https://crates.io/crates/remote-clipboard)
 
-rclip is a remote clipboard. It allows users to copy and paste data remotely from two different machines.
+rclip is a remote clipboard. It allows users to copy and paste data remotely from two or more different machines.
+You can access the tool via a CLI and a webpage: https://www.remote-clipboard.net/
 
-Linux and OSX are supported. Windows is not actively tested but should work as well.
+CLI is supported on Linux and OSX. Windows is not actively tested but should work as well.
 
 ## Table of Contents
 * [Usage](#usage-demo)
