@@ -9,6 +9,12 @@
         <script src="https://js.stripe.com/v3/"></script>
         <script>
             window.onload = function() {
+
+                refreshLoginInputs(document.getElementById('email'),
+                                   document.getElementById('passwd'),
+                                   document.getElementById('loginButton'),
+                                   document.getElementById('loginConsole'));
+
                 document.getElementById("contentPaste").style.display = "none";
                 var url = new URL(document.location);
                 var token = url.searchParams.get("token");
@@ -46,6 +52,12 @@
         </script>
     </head>
     <body>
+        <nav>
+            <label id='loginConsole'></label>
+            <input type="text" name="email" id="email" maxlength="20" placeholder="email">
+            <input type="password" name="passwd" id="passwd" maxlength="10" placeholder="passwd">
+            <button id="loginButton" onclick="javascript:handleLogin(document.getElementById('email'),document.getElementById('passwd'), document.getElementById('loginButton'), document.getElementById('loginConsole'))">Login</button>
+        </nav>
         <header>
             <div id="logo"><a href="https://www.remote-clipboard.net/" class="logo">Remote Clipboard</a></div>
         </header>
@@ -55,7 +67,7 @@
                 <h1>Enter the clipboard token and save or retrieve associated content</h1>
 
                 <label for="token">Token:</label>
-                <input type="text" name="token" id="token" maxlength="40" placeholder="Enter token" required>
+                <input type="text" name="token" id="token" maxlength="6" placeholder="Enter token">
 
                 <label for="content">Content:</label>
                 <textarea type="text" rows="1" name="content" id="content" maxlength="255" placeholder="Enter content"></textarea>
@@ -64,8 +76,8 @@
                 <br>
 
                 <button id="generateButton" onclick="javascript:handleGenerate(document.getElementById('token'), generateButton)">Get token</button>
-                <button id="copyButton" onclick="javascript:handleCopy(token.value, copyButton, document.getElementById('content'))">Copy</button>
-                <button id="pasteButton" onclick="javascript:handlePaste(token.value, pasteButton, document.getElementById('contentPaste'), document.getElementById('paste'))">Paste</button>
+                <button id="copyButton" onclick="javascript:handleCopy(token, copyButton, document.getElementById('content'))">Copy</button>
+                <button id="pasteButton" onclick="javascript:handlePaste(token, pasteButton, document.getElementById('contentPaste'), document.getElementById('paste'))">Paste</button>
                 <button id="shareButton" onclick="javascript:shareClipboard(token.value, shareButton)">Share</button>
 
                 <p class="boxfooter">remote-clipboard.net is a free tool to copy and paste content given a token.</p>

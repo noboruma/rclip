@@ -3,9 +3,11 @@ use std::collections::HashMap;
 
 const TEXT_PARAM: &'static str = "text";
 const TOKEN_PARAM: &'static str = "TOKEN";
+const NAMESPACE_PARAM: &'static str = "NAMESPACE";
 const SHORTHASH_PARAM: &'static str = "shortHash";
 pub const URL_PARAM: &'static str = "RCLIP_URL";
 const OPEN_ENDPOINT: &'static str = "open";
+const LOGIN_ENDPOINT: &'static str = "login";
 const LINK_ENDPONT: &'static str = "link";
 const COPY_ENDPOINT: &'static str = "push";
 const PASTE_ENDPONT: &'static str = "pull";
@@ -214,6 +216,61 @@ impl Clipboard {
 
     fn open_impl(&self, completion: Box<dyn FnOnce(JsonResult)>) {
         let url = http::prepare_endpoint(&self.config, OPEN_ENDPOINT);
+        http::get_http_response_comp(&url, completion);
+    }
+
+    #[cfg(not(target_arch = "wasm32"))]
+    pub fn login(&mut self,
+                 email: &mut dyn Read,
+                 passwd: &mut dyn Read) -> Result<(), ClipboardError> {
+        let (sender, receiver) = oneshot::channel::<JsonResult>();
+
+        let wrapper = move |resp : JsonResult| {
+            sender.send(resp).unwrap();
+        };
+
+        self.login_impl(email, passwd, Box::new(wrapper));
+
+        return futures::executor::block_on(async {
+            let resp = receiver.await.unwrap_or(Err(ClipboardError::AwaitError))?;
+            return match resp.get(&String::from(NAMESPACE_PARAM)) {
+                Some(token) => { self.config.namespace = token.clone(); Ok(()) },
+                _ => Err(ClipboardError::BackendError)
+            }
+        });
+    }
+
+    pub fn login_comp(&self,
+                      email: &mut dyn Read,
+                      passwd: &mut dyn Read,
+                      completion: Box<dyn Fn(Result<String, ClipboardError>)>) -> Result<(), ClipboardError> {
+
+        let wrapper = move |resp : JsonResult| {
+            match resp {
+                Ok(resp) => {
+                    match resp.get(&String::from(NAMESPACE_PARAM)) {
+                        Some(x) =>  {
+                            return completion(Ok(x.to_string()));
+                        },
+                        None => (),
+                    };
+                },
+                _ => (),
+            };
+            completion(Err(ClipboardError::BackendError));
+        };
+
+        self.login_impl(email, passwd, Box::new(wrapper));
+        Ok(())
+    }
+
+    fn login_impl(&self,
+                  email: &mut dyn Read,
+                  passwd: &mut dyn Read,
+                  completion: Box<dyn FnOnce(JsonResult)>) {
+        let mut url = http::prepare_endpoint(&self.config, LOGIN_ENDPOINT);
+        http::append_query(&mut url, email, &"email");
+        http::append_query(&mut url, passwd, &"passwd");
         http::get_http_response_comp(&url, completion);
     }
 

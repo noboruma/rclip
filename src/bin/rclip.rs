@@ -60,6 +60,7 @@ fn construct_default_config(stdout: &mut io::Stdout, config_path: std::path::Pat
         config_path,
         base_url: url::Url::parse(std::str::from_utf8(&base64::decode("aHR0cHM6Ly9hd3MucmVtb3RlLWNsaXBib2FyZC5uZXQ=").unwrap()).unwrap()).unwrap(),
         token: String::new(),
+        namespace: String::new(),
     };
 }
 
@@ -81,7 +82,7 @@ async fn main() {
     let stdin  = io::stdin();
 
     let mut args = env::args();
-    if args.len() > 3 {
+    if args.len() > 4 {
         fail("too many arguments");
     }
 
@@ -127,6 +128,23 @@ async fn main() {
                     Some(_) => fail("too many arguments"),
                     None => fail_error(&clipboard.paste(&mut stdout.lock())),
                 };
+            },
+            "login" => {
+                let mut clipboard = construct_clipboard(&mut stdout);
+                let mut email : Box<dyn Read> = match args.next() {
+                    Some(text) => Box::new(rclip::stream::StringStream::from(text)),
+                    None => Box::new(stdin.lock()),
+                };
+                let mut passwd : Box<dyn Read> = match args.next() {
+                    Some(text) => Box::new(rclip::stream::StringStream::from(text)),
+                    None => Box::new(stdin.lock()),
+                };
+                fail_error(&clipboard.login(&mut email, &mut passwd));
+                let config = &clipboard.config;
+                config.store();
+                stdout.lock()
+                    .write(format!("You are logged in")
+                        .as_bytes()).unwrap();
             },
             "-h" | "--help" | _ => stdout.lock().write_all(HELP).unwrap(),
         },

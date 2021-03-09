@@ -1,4 +1,4 @@
-use crate::{config, TOKEN_PARAM, ClipboardError};
+use crate::{config, TOKEN_PARAM, NAMESPACE_PARAM, ClipboardError};
 use std::collections::HashMap;
 use std::io::Read;
 use url::Url;
@@ -11,6 +11,9 @@ pub fn prepare_endpoint(config_context: &config::ConfigContext, path: &str) -> U
     let mut url = config_context.base_url.clone();
     url.set_path(path);
     append_query(&mut url, &mut config_context.token.as_bytes(), &TOKEN_PARAM);
+    if !config_context.namespace.is_empty() {
+        append_query(&mut url, &mut config_context.namespace.as_bytes(), &NAMESPACE_PARAM);
+    }
     return url;
 }
 

@@ -11,14 +11,19 @@ module.exports = {
             lib.open(callback);
         });
     },
-    handleCopy: function(token, data, callback) {
+    handleLogin: function(email, passwd, callback) {
         import("../pkg").then(lib => {
-            lib.copy(token, data, callback);
+            lib.login(email, passwd, callback);
         });
     },
-    handlePaste: function(token, callback) {
+    handleCopy: function(token, namespace, data, callback) {
         import("../pkg").then(lib => {
-            lib.paste(token, callback);
+            lib.copy(token, namespace, data, callback);
+        });
+    },
+    handlePaste: function(token, namespace, callback) {
+        import("../pkg").then(lib => {
+            lib.paste(token, namespace, callback);
         });
     }
 };

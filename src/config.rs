@@ -1,4 +1,4 @@
-use crate::{URL_PARAM, TOKEN_PARAM};
+use crate::{URL_PARAM, TOKEN_PARAM, NAMESPACE_PARAM};
 use dotenv;
 use std::fs::File;
 use std::io::Write;
@@ -17,6 +17,7 @@ pub struct ConfigContext {
     pub config_path: PathBuf,
     pub base_url: url::Url,
     pub token: String,
+    pub namespace: String,
 }
 
 fn get_config_path() -> Option<std::path::PathBuf> {
@@ -54,10 +55,14 @@ impl ConfigContext {
         let token = dotenv::var(TOKEN_PARAM)
             .unwrap_or(String::new());
 
+        let namespace = dotenv::var(NAMESPACE_PARAM)
+            .unwrap_or(String::new());
+
         return Ok(ConfigContext {
             config_path,
             base_url: url,
             token,
+            namespace,
         });
     }
 
@@ -65,6 +70,7 @@ impl ConfigContext {
         let mut data = String::new();
         data += URL_PARAM; data += "="; data += self.base_url.as_str(); data += "\n";
         data += TOKEN_PARAM; data += "="; data += self.token.as_str(); data += "\n";
+        data += NAMESPACE_PARAM; data += "="; data += self.namespace.as_str(); data += "\n";
 
         let mut config_file = File::create(&self.config_path).unwrap();
         config_file.write(data.as_bytes()).unwrap();

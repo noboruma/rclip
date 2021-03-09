@@ -48,8 +48,57 @@ function handleGenerate(tokenInput, button) {
         tokenInput.required = true;
     });
 }
+function refreshLoginInputs(emailInput, passwdInput, button, loginConsole) {
+    if (getCookie("namespace")) {
+        emailInput.style.display = 'none';
+        emailInput.required = false;
+        passwdInput.style.display = 'none';
+        passwdInput.required = false;
+        toggleButton(true, button, "Log off");
+        loginConsole.innerText = "Logged in";
+    } else {
+        emailInput.style.display = '';
+        emailInput.required = false;
+        passwdInput.style.display = '';
+        passwdInput.required = false;
+        toggleButton(true, button, "Login");
+        loginConsole.innerText = "";
+    }
+}
+function handleLogin(emailInput, passwdInput, button, loginConsole) {
+    if (getCookie("namespace")) {
+        setCookie('namespace', '');
+        refreshLoginInputs(emailInput, passwdInput, button, loginConsole);
+        return;
+    }
+
+    if (emailInput.value.length == 0) {
+        emailInput.required = true;
+        return;
+    }
+
+    if (passwdInput.value.length == 0) {
+        passwdInput.required = true;
+        return;
+    }
+
+    toggleButton(false, button, "Login...");
+    rclip.handleLogin(emailInput.value, passwdInput.value,
+        function (namespace) {
+            if (namespace !== 'error') {
+                setCookie("namespace", namespace);
+                refreshLoginInputs(emailInput, passwdInput, button, loginConsole);
+            } else {
+                refreshLoginInputs(emailInput, passwdInput, button, loginConsole);
+                loginConsole.innerText = 'Wrong email/password';
+            }
+    });
+}
 function handleCopy(token, button, content) {
-    if (token.length == 0) return;
+    if (token.value.length == 0) {
+        token.required = true;
+        return;
+    }
 
     if (content.value.length == 0) {
         content.required = true;
@@ -57,20 +106,25 @@ function handleCopy(token, button, content) {
     }
 
     toggleButton(false, button, "Copying...");
-    setCookie("token", token);
-    rclip.handleCopy(token, content.value, function() {
+    setCookie("token", token.value);
+    namespace = getCookie('namespace');
+    rclip.handleCopy(token.value, namespace, content.value, function() {
         toggleButton(true, button, "Copy");
     });
 }
 function handlePaste(token, button, pasteSection, pasteOutput) {
-    if (token.length == 0) return;
+    if (token.value.length == 0) {
+        token.required = true;
+        return;
+    }
 
     toggleButton(false, button, "Pasting...");
 
-    setCookie("token", token);
+    setCookie("token", token.value);
 
     pasteSection.style.display = "block";
-    rclip.handlePaste(token, function (value) {
+    namespace = getCookie('namespace');
+    rclip.handlePaste(token.value, namespace, function (value) {
         pasteOutput.value = value;
         toggleButton(true, button, "Paste");
     });
