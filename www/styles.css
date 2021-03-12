@@ -14,7 +14,7 @@ section .boxfooter {
 }
 button {
     border-color: currentcolor;
-    height: 20px;
+    font-size: medium;
     color: #fff;
     background-color: #cf45c5;
     text-align: center;
@@ -43,14 +43,11 @@ nav {
     background-image: none;
     width: 100%;
     border-bottom: 6px solid #af25a5;
-    padding: 0px 0 20px;
     line-height: 1.5;
     color: rgb(150, 150, 150);
     background-image: none;
-    position: relative;
-    bottom: 0;
-    height: 5px;
-    margin: 0;
+    position: fixed;
+    top: 0;
 }
 footer {
     text-align: center;
@@ -60,14 +57,12 @@ footer {
     background-image: none;
     width: 100%;
     border-top: 6px solid #af25a5;
-    padding: 20px 0 100px;
+    padding: 20px 0 0px;
     line-height: 1.5;
     color: rgb(150, 150, 150);
     background-image: none;
     position: relative;
-    bottom: 0;
-    height: 10px;
-    margin: 0;
+    height: 100%;
 }
 footer ul li {
     display: inline;
@@ -91,8 +86,8 @@ section#clipbox {
 main {
     display: block;
     margin: 0 auto 0 auto;
-    padding: 0 20px;
-    max-width: 800px;
+    padding-top: 50px;
+    padding-bottom: 50px;
 }
 header a.logo {
     font: 900 49px asap,arial;

@@ -2,6 +2,7 @@
 <html>
     <head>
         <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width,initial-scale=1.0">
         <title>remote-clipboard</title>
         <script src="./bundle.js"></script>
         <script src="./utils.js"></script>
@@ -58,11 +59,11 @@
             <input type="password" name="passwd" id="passwd" maxlength="10" placeholder="passwd">
             <button id="loginButton" onclick="javascript:handleLogin(document.getElementById('email'),document.getElementById('passwd'), document.getElementById('loginButton'), document.getElementById('loginConsole'))">Login</button>
         </nav>
-        <header>
-            <div id="logo"><a href="https://www.remote-clipboard.net/" class="logo">Remote Clipboard</a></div>
-        </header>
-        <br>
         <main>
+            <header>
+                <div id="logo"><a href="https://www.remote-clipboard.net/" class="logo">Remote Clipboard</a></div>
+            </header>
+            <br>
             <section id="clipbox">
                 <h1>Enter the clipboard token and save or retrieve associated content</h1>
 

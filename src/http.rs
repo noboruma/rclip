@@ -64,6 +64,7 @@ mod tests {
             base_url: url::Url::parse("https://toto.com").unwrap(),
             config_path: PathBuf::from("/foo"),
             token: "".to_string(),
+            namespace: "".to_string(),
         };
         let url = prepare_endpoint(&config_context, "ok");
         assert_eq!(url.as_str(), "https://toto.com/ok?TOKEN=");
@@ -75,6 +76,7 @@ mod tests {
             base_url: url::Url::parse("https://toto.com").unwrap(),
             config_path: PathBuf::from("/foo"),
             token: "abc".to_string(),
+            namespace: "".to_string(),
         };
         let url = prepare_endpoint(&config_context, "ok");
         assert_eq!(url.as_str(), "https://toto.com/ok?TOKEN=abc");

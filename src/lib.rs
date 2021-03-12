@@ -57,6 +57,7 @@ impl Clipboard {
     ///     config_path: PathBuf::from("/blah"),
     ///     base_url: url::Url::parse("https://toto.com").unwrap(),
     ///     token: String::from("token"),
+    ///     namespace: String::from("namespace"),
     /// });
     /// //clipboard.copy(&mut "toto".as_bytes());
     /// ```
@@ -109,6 +110,7 @@ impl Clipboard {
     ///     config_path: PathBuf::from("/blah"),
     ///     base_url: url::Url::parse("https://toto.com").unwrap(),
     ///     token: String::from("token"),
+    ///     namespace: String::from("namespace"),
     /// });
     /// let stdout = io::stdout();
     /// //clipboard.paste(&mut stdout.lock());
@@ -171,6 +173,7 @@ impl Clipboard {
     ///     config_path: PathBuf::from("/blah"),
     ///     base_url: url::Url::parse("https://toto.com").unwrap(),
     ///     token: String::from("token"),
+    ///     namespace: String::from("namespace"),
     /// });
     /// //clipboard.open();
     /// ```
@@ -291,6 +294,7 @@ impl Clipboard {
     ///     config_path: PathBuf::from("/blah"),
     ///     base_url: url::Url::parse("https://toto.com").unwrap(),
     ///     token: String::from("token"),
+    ///     namespace: String::from("namespace"),
     /// });
     /// //clipboard.link(&mut "012345".as_bytes());
     /// ```
@@ -332,6 +336,7 @@ mod tests {
             config_path: PathBuf::from("/blah"),
             base_url: url::Url::parse("https://toto.com").unwrap(),
             token: String::from("token"),
+            namespace: String::from("namespace"),
         }
     }
 

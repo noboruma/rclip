@@ -11,7 +11,7 @@ function copyContent(textarea, button) {
 function setCookie(name, value) {
     var today = new Date();
     var expiry = new Date(today.getTime() + 30 * 24 * 3600 * 1000);
-    document.cookie=name + "=" + escape(value) + ";expires=" + expiry.toGMTString() + ";path=/";
+    document.cookie=name + "=" + escape(value) + ";expires=" + expiry.toGMTString() + ";path=/;secure";
 }
 function getCookie(name) {
     if (document.cookie != ""){
