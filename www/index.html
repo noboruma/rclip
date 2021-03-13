@@ -4,6 +4,7 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width,initial-scale=1.0">
         <title>remote-clipboard</title>
+        <script data-ad-client="ca-pub-6692104157572302" async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
         <script src="./bundle.js"></script>
         <script src="./utils.js"></script>
         <link rel="stylesheet" href="styles.css">
@@ -24,7 +25,7 @@
                 } else {
                     document.getElementById("token").value = getCookie("token");
                 }
-                var stripe = Stripe('pk_test_51HnphKL0K0gJMCg8Fgje3Pv8REFRR355kYfliXuLBgT3E3Tzg9GvOvAeH1u7kxKn5ACI01x8ddJJEYawzdcKNTsZ00tvG000MF');
+                var stripe = Stripe('pk_live_51HnphKL0K0gJMCg80C3CVcGkpI0WDqixlACubQIoSck8rcSYe49r3qG0Gn0nBfttTYf4LhADDUPz5zglSkOhYSFb005l87TUpA');
                 var checkoutButton = document.getElementById('checkout-button');
                 checkoutButton.addEventListener('click', function() {
                         fetch('https://aws.remote-clipboard.net/checkout_namespace', {
