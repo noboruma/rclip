@@ -6,6 +6,7 @@ require('file-loader?name=[name].[ext]!./footer.html');
 require('file-loader?name=[name].[ext]!./styles.css');
 require('file-loader?name=[name].[ext]!./utils.js');
 require('file-loader?name=[name].[ext]!./favicon.ico');
+require('file-loader?name=[name].[ext]!./sitemap.xml');
 module.exports = {
     handleGenerate: function(callback) {
         import("../pkg").then(lib => {

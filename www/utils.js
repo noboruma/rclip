@@ -132,17 +132,23 @@ function handlePaste(token, button, pasteSection, pasteOutput) {
 function shareClipboard(token, button) {
     if (token.length == 0) return;
 
-    toggleButton(false, button, "Copied!");
+    var namespace = '';
 
-    const tmp = document.createElement('textarea');
-    tmp.value = window.location.href.split('?')[0] + '?token=' + token;
-    document.body.appendChild(tmp);
-    tmp.select();
-    document.execCommand('copy');
-    document.body.removeChild(tmp);
+    toggleButton(false, button, "Sharing...");
 
-    setTimeout(function() {
-        toggleButton(true, button, "Share");
-    }, 500);
+    rclip.handlePaste(token, namespace, function (value) {
+        rclip.handleGenerate(function (new_token) {
+            toggleButton(false, button, "URL Copied!");
+            rclip.handleCopy(new_token, namespace, value, function() {
+                const tmp = document.createElement('textarea');
+                tmp.value = window.location.href.split('?')[0] + '?token=' + new_token;
+                document.body.appendChild(tmp);
+                tmp.select();
+                document.execCommand('copy');
+                document.body.removeChild(tmp);
+                toggleButton(true, button, "Share");
+            });
+        });
+    });
 }
 
